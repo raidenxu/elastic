@@ -264,7 +264,7 @@ func (a *CompositeAggregationTermsValuesSource) Source() (interface{}, error) {
 // CompositeAggregationHistogramValuesSource is a source for the CompositeAggregation that handles histograms
 // it works very similar to a terms histogram with slightly different syntax
 //
-// See https://www.elastic.co/guide/en/elasticsearch/reference/7.0/search-aggregations-bucket-composite-aggregation.html#_histogram
+// See https://www.elastic.co/guide/en/elasticsearch/reference/7.6/search-aggregations-bucket-composite-aggregation.html#_histogram
 // for details.
 type CompositeAggregationHistogramValuesSource struct {
 	name          string
@@ -275,6 +275,7 @@ type CompositeAggregationHistogramValuesSource struct {
 	missingBucket *bool
 	order         string
 	interval      float64
+	offset        string
 }
 
 // NewCompositeAggregationHistogramValuesSource creates and initializes
@@ -346,6 +347,12 @@ func (a *CompositeAggregationHistogramValuesSource) Interval(interval float64) *
 	return a
 }
 
+// Interval specifies the interval to use.
+func (a *CompositeAggregationHistogramValuesSource) Offset(offset string) *CompositeAggregationHistogramValuesSource {
+	a.offset = offset
+	return a
+}
+
 // Source returns the serializable JSON for this values source.
 func (a *CompositeAggregationHistogramValuesSource) Source() (interface{}, error) {
 	source := make(map[string]interface{})
@@ -391,6 +398,9 @@ func (a *CompositeAggregationHistogramValuesSource) Source() (interface{}, error
 	// Histogram-related properties
 	values["interval"] = a.interval
 
+	// Histogram-related properties
+	values["offset"] = a.offset
+
 	return source, nil
 
 }
@@ -415,6 +425,7 @@ type CompositeAggregationDateHistogramValuesSource struct {
 	calendarInterval interface{}
 	format           string
 	timeZone         string
+	offset           string
 }
 
 // NewCompositeAggregationDateHistogramValuesSource creates and initializes
@@ -511,6 +522,12 @@ func (a *CompositeAggregationDateHistogramValuesSource) TimeZone(timeZone string
 	return a
 }
 
+// TimeZone to use for the dates.
+func (a *CompositeAggregationDateHistogramValuesSource) Offset(offset string) *CompositeAggregationDateHistogramValuesSource {
+	a.offset = offset
+	return a
+}
+
 // Source returns the serializable JSON for this values source.
 func (a *CompositeAggregationDateHistogramValuesSource) Source() (interface{}, error) {
 	source := make(map[string]interface{})
@@ -566,6 +583,9 @@ func (a *CompositeAggregationDateHistogramValuesSource) Source() (interface{}, e
 	}
 	if v := a.calendarInterval; v != nil {
 		values["calendar_interval"] = v
+	}
+	if a.offset != "" {
+		values["offset"] = a.offset
 	}
 
 	// timeZone
